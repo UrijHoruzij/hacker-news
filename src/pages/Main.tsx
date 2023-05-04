@@ -1,20 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
-import { Rating, Button } from '@mui/material';
+import { Button, Container, CircularProgress, Grid, Typography, Box } from '@mui/material';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import { countComments, BASE_API_URL } from '../utils';
-interface INews {
-	by: string;
-	descendants: number;
-	id: number;
-	kids?: number[];
-	score: number;
-	time: number;
-	title: string;
-	type: string;
-	url: string;
-	comments: number;
-}
+import { CardNews } from '../components';
+import { INews } from '../@types.news';
 
 const Main = (): JSX.Element => {
 	const [news, setNews] = useState<INews[]>([]);
@@ -25,7 +14,7 @@ const Main = (): JSX.Element => {
 			const newsTemp = new Array<INews>();
 			const res = await fetch(`${BASE_API_URL}/newstories.json`);
 			const result = await res.json();
-			for (let i = 85; i < 100; i++) {
+			for (let i = 0; i < 100; i++) {
 				const resNews = await fetch(`${BASE_API_URL}/item/${result[i]}.json`);
 				const resultNews = await resNews.json();
 				if (resultNews.kids) {
@@ -55,31 +44,46 @@ const Main = (): JSX.Element => {
 		return () => clearTimeout(timer);
 	}, []);
 	return (
-		<div>
-			{isLoading ? (
-				<div>Загрузка</div>
-			) : (
-				<>
+		<Container maxWidth="lg">
+			<Grid container spacing={2}>
+				<Grid item xs={10}>
+					<Typography variant="h3">News</Typography>
+				</Grid>
+				<Grid item xs={2} sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
 					<Button startIcon={<RefreshIcon fontSize="small" />} variant="contained" onClick={handleClick}>
-						Обновить
+						Update
 					</Button>
-					{news.map((item) => (
-						<li key={item.id}>
-							{item.title}
-							<Rating defaultValue={item.score} precision={0.5} readOnly />
-							{item.by}
-							{new Date(item.time * 1000).toLocaleDateString('en-US', {
-								hour: 'numeric',
-								minute: 'numeric',
-							})}
-							{item.comments}
-
-							<Link to={`/${item.id}`}>{item.title}</Link>
-						</li>
-					))}
-				</>
-			)}
-		</div>
+				</Grid>
+				<Grid item xs={12}>
+					{isLoading ? (
+						<Box
+							sx={{
+								display: 'flex',
+								justifyContent: 'center',
+								alignItems: 'center',
+								height: 300,
+							}}>
+							<CircularProgress />
+						</Box>
+					) : (
+						<Grid container sx={{ maxWidth: '100%' }} spacing={2}>
+							{news.map((item) => (
+								<Grid item xs={12} key={item.id}>
+									<CardNews
+										url={item.id}
+										time={item.time}
+										title={item.title}
+										comments={item.comments}
+										rating={item.score}
+										author={item.by}
+									/>
+								</Grid>
+							))}
+						</Grid>
+					)}
+				</Grid>
+			</Grid>
+		</Container>
 	);
 };
 
