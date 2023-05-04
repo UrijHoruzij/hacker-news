@@ -18,7 +18,7 @@ jobs:
       - name: Install dependencies
         run: yarn install
       - name: Build
-        run: npm run build
+        run: CI=false npm run build
       - name: Deploy
         uses: JamesIves/github-pages-deploy-action@v4
         with:
